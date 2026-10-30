@@ -1,0 +1,12 @@
+# Build artifacts
+*.exe
+*.o
+*.obj
+*.wasm
+*.dll
+*.so
+*.a
+bin/
+build/
+.vscode/
+
