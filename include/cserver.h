@@ -9,6 +9,7 @@
 #include "http_proto.h"
 #include "context.h"
 #include "server.h"
+#include "engine.h"
 
 #endif /* CSERVER_H */
 

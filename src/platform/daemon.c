@@ -1,27 +1,19 @@
 #include "../../include/server.h"
-#include <stdio.h>
 
-/**
- * Platform I/O Driver / Socket Daemon
- * Handles network listening, accepts TCP client sockets,
- * feeds byte buffers into the Sans-I/O HTTP parser, and dispatches via app_dispatch.
- */
-
-int app_listen(app_t *app, int port) {
-    printf("[c-server] Starting listener on port %d...\n", port);
-    
 #if defined(_WIN32)
-    /* Winsock initialization & select/IOCP loop */
-    printf("[c-server] Platform: Windows (Winsock)\n");
+    int platform_listen_win32(app_t *app, int port);
 #elif defined(__wasi__)
-    /* WASI 0.2 wasi:sockets or stdin/stdout streaming mode */
-    printf("[c-server] Platform: WebAssembly (WASI)\n");
+    int platform_listen_wasi(app_t *app, int port);
 #else
-    /* POSIX BSD sockets & poll/epoll */
-    printf("[c-server] Platform: POSIX\n");
+    int platform_listen_posix(app_t *app, int port);
 #endif
 
-    (void)app;
-    return 0;
+int app_listen(app_t *app, int port) {
+#if defined(_WIN32)
+    return platform_listen_win32(app, port);
+#elif defined(__wasi__)
+    return platform_listen_wasi(app, port);
+#else
+    return platform_listen_posix(app, port);
+#endif
 }
-

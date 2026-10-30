@@ -7,6 +7,7 @@ void logger_middleware(http_req_t *req, http_res_t *res, http_next_fn next, void
     printf("[LOG] %s request to %.*s\n", 
            http_method_to_string(req->method), 
            (int)req->path.len, req->path.ptr);
+    fflush(stdout);
     
     /* Call next middleware/handler in chain */
     next(state);
@@ -35,9 +36,15 @@ int main(void) {
     app_get(app, "/", handle_hello);
     app_get(app, "/api/status", handle_api_status);
 
-    /* 3. Start Listener */
-    app_listen(app, 8080);
+    /* 3. Start Engine */
+    engine_config_t config = engine_default_config();
+    config.port = 8080;
 
+    engine_t *engine = engine_create(app, &config);
+    engine_start(engine);
+
+    /* Cleanup */
+    engine_destroy(engine);
     app_destroy(app);
     return 0;
 }

@@ -60,6 +60,9 @@ typedef struct http_res {
 } http_res_t;
 
 /* Context helper functions */
+void req_init(http_req_t *req, const http_raw_request_t *raw, arena_t *arena);
+void res_init(http_res_t *res, arena_t *arena);
+
 const char *req_get_header(http_req_t *req, const char *key);
 const char *req_get_param(http_req_t *req, const char *key);
 
@@ -67,6 +70,10 @@ void res_status(http_res_t *res, int code);
 void res_set_header(http_res_t *res, const char *key, const char *val);
 void res_send(http_res_t *res, const char *body);
 void res_json(http_res_t *res, const char *json_string);
+
+/* Response serialization to HTTP/1.1 wire format */
+const char *http_status_text(int code);
+size_t res_serialize(const http_res_t *res, char *out_buf, size_t max_len);
 
 #endif /* CSERVER_CONTEXT_H */
 

@@ -72,12 +72,26 @@ static void pipeline_step(void *state_ptr) {
         bool method_matches = (entry->method == HTTP_METHOD_UNKNOWN) || (entry->method == state->req->method);
         if (!method_matches) continue;
 
-        /* Basic path prefix matching */
-        if (entry->path_prefix && strcmp(entry->path_prefix, "/") != 0) {
+        /* Path matching:
+         * - For middleware (HTTP_METHOD_UNKNOWN): prefix match
+         * - For specific routes (GET, POST, etc.): exact match
+         */
+        if (entry->path_prefix) {
             size_t prefix_len = strlen(entry->path_prefix);
-            if (state->req->path.len < prefix_len ||
-                strncmp(state->req->path.ptr, entry->path_prefix, prefix_len) != 0) {
-                continue;
+            if (entry->method == HTTP_METHOD_UNKNOWN) {
+                /* Middleware: "/" matches all; otherwise check prefix */
+                if (strcmp(entry->path_prefix, "/") != 0) {
+                    if (state->req->path.len < prefix_len ||
+                        strncmp(state->req->path.ptr, entry->path_prefix, prefix_len) != 0) {
+                        continue;
+                    }
+                }
+            } else {
+                /* Route: exact path match */
+                if (state->req->path.len != prefix_len ||
+                    strncmp(state->req->path.ptr, entry->path_prefix, prefix_len) != 0) {
+                    continue;
+                }
             }
         }
 
